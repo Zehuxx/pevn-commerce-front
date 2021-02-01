@@ -1,0 +1,7 @@
+.footer-style {
+    z-index: 5;
+}
+
+.v-navigation-drawer--fixed {
+    z-index: 7!important;
+}
