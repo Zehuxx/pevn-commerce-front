@@ -8,6 +8,19 @@
         <h1>Agregar comercio</h1>
       </v-col>
       <v-col cols="12" lg="6" md="6" sm="6">
+        <v-alert
+        v-model="alert"
+        dismissible
+        type="error"
+        border="left"
+        elevation="2"
+        colored-border
+        >
+        <ul>
+          <li class="red--text" v-for="error in serverErrors" :key="error.message">{{error.msg}}</li>
+        </ul>
+        
+        </v-alert>
         <v-form
           ref="form"
           v-model="valid"
@@ -131,11 +144,13 @@ export default {
   data: () => ({
     commerceTypes: [],
     commerceSubTypes: [],
+    serverErrors:[],
+    alert:false,
     commerce: {
       name: "",
       owner_name: "",
-	  address: "",
-	  commerceType: null,
+	    address: "",
+	    commerceType: null,
       id_cst: null,
       fundation_date: null,
     },
@@ -144,14 +159,14 @@ export default {
     nameRules: [
       (v) => !!v || "Nombre del comercio es requerido",
       (v) =>
-        (v && v.length <= 40) ||
-        "El nombre del comercio debe de tener no mas de 40 caracteres",
+        (v && v.length >= 5 && v.length <= 40 ) ||
+        "El nombre del comercio debe de tener entre 5 y 40 caracteres",
     ],
     owner_nameRules: [
       (v) => !!v || "Nombre del propietario es requerido",
       (v) =>
-        (v && v.length <= 40) ||
-        "El nombre del propietario debe de tener no mas de 40 caracteres",
+        (v && v.length >= 5 && v.length <= 40) ||
+        "El nombre del propietario debe de tener entre 5 y 40 caracteres",
     ],
     addressRules: [
       (v) => !!v || "La Dirección es requerida",
@@ -174,7 +189,7 @@ export default {
       if (day.length < 2) day = "0" + day;
 
       return [year, month, day].join("-");
-    },
+    }
   },
   created() {
     this.getCommerceTypes();
@@ -205,20 +220,28 @@ export default {
       }
     },
     async createCommerce() {
+      console.log(this.commerce);
       let valid = this.$refs.form.validate();
       if (valid) {
-		  this.valid=!this.valid;
+		  this.valid=!this.valid; 
         await this.axios
           .post("/commerces/create", this.commerce)
           .then((resp) => {
             this.$router.push({ name: "commerces" });
           })
           .catch((err) => {
-			    this.valid=!this.valid;
-            console.log(err);
+            err = err.response;
+            if(err.status == 400){
+              this.serverErrors = err.data.errors;
+              this.alert = true;
+            }else{
+              this.serverErrors=[];
+              this.alert = false;
+            }
+            this.valid=!this.valid;
           });
       }
-    },
+    }
   },
 };
 </script>

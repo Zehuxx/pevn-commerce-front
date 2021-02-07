@@ -1,5 +1,5 @@
-<template>
-  <v-container fluid fill-height>
+<template >
+  <v-container fluid fill-height v-if="!isLoading">
     <v-row justify="center" align="center">
       <v-col cols="12" class="text-center">
         <h1>Editar comercio</h1>
@@ -126,6 +126,7 @@
 <script>
 export default {
   data: () => ({
+    isLoading: true,
     commerceTypes: [],
     commerceSubTypes: [],
     commerce: {
@@ -175,7 +176,6 @@ export default {
   },
   mounted() {
     this.getCommerceTypes();
-    this.getCommerceData();
   },
   methods: {
     reset() {
@@ -198,6 +198,7 @@ export default {
       try {
         let data = await this.axios.get("/commercetypes/");
         this.commerceTypes = data.data.commerceTypes;
+        this.getCommerceData();
       } catch (err) {
         this.commerceTypes = [];
         console.log(err);
@@ -217,6 +218,7 @@ export default {
             fundation_date: commerce.fundation_date,
         });
         this.getSubCommerceTypes(commerce.commercesubtype.id_ct)
+        this.isLoading = false;
       } catch (error) {
         this.commerce = {};
         console.log(error);
